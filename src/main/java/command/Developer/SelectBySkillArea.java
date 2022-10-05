@@ -4,12 +4,12 @@ import command.Command;
 import command.Console;
 import service.crud.DeveloperService;
 
-public class SelectAll implements Command {
-    public static final String COMMAND_NAME = "select_all_developers";
+public class SelectBySkillArea implements Command {
+    public static final String COMMAND_NAME = "select_by_skill_area";
     Console console;
     DeveloperService developerService;
 
-    public SelectAll(Console console, DeveloperService developerService) {
+    public SelectBySkillArea(Console console, DeveloperService developerService) {
         this.console = console;
         this.developerService = developerService;
     }
@@ -21,6 +21,9 @@ public class SelectAll implements Command {
 
     @Override
     public void execute() {
-        developerService.selectAll();
+        String skillArea;
+        System.out.println("Please enter skill area:");
+        skillArea = console.read();
+        developerService.selectBySkillArea(skillArea);
     }
 }

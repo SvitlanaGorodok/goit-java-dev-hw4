@@ -4,7 +4,7 @@ public class SkillDto {
     private Integer id;
     private String area;
     private String level;
-
+    public SkillDto(){}
     public SkillDto(Integer id, String area, String level) {
         this.id = id;
         this.area = area;
@@ -33,5 +33,11 @@ public class SkillDto {
 
     public void setLevel(String level) {
         this.level = level;
+    }
+    @Override
+    public String toString() {
+        return  "id = " + id +
+                ", area = '" + area + '\'' +
+                ", level = '" + level;
     }
 }

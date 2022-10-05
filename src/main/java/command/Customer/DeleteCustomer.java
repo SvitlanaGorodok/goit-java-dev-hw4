@@ -2,10 +2,8 @@ package command.Customer;
 
 import command.Command;
 import command.Console;
-import entities.dto.CustomerDto;
 import service.crud.CustomerService;
 
-import java.sql.Date;
 
 public class DeleteCustomer implements Command {
     public static final String COMMAND_NAME = "delete_customer";
@@ -24,20 +22,16 @@ public class DeleteCustomer implements Command {
 
     @Override
     public void execute() {
-        CustomerDto customer = new CustomerDto();
+        Integer customerId;
         System.out.println("Please enter customer id:");
         while (true){
             try{
-                customer.setId(Integer.parseInt(console.read()));
+                customerId = Integer.parseInt(console.read());
                 break;
             } catch (NumberFormatException e){
                 System.out.println("Invalid value. Use digits!");
             }
         }
-        System.out.println("Please enter customer name:");
-        customer.setName(console.read());
-        System.out.println("Please enter customer description:");
-        customer.setDescription(console.read());
-        customerService.delete(customer);
+        customerService.delete(customerId);
     }
 }

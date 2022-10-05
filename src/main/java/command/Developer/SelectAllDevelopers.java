@@ -4,12 +4,12 @@ import command.Command;
 import command.Console;
 import service.crud.DeveloperService;
 
-public class SelectBySkill implements Command {
-    public static final String COMMAND_NAME = "select_by_mid_skill";
+public class SelectAllDevelopers implements Command {
+    public static final String COMMAND_NAME = "select_all_developers";
     Console console;
     DeveloperService developerService;
 
-    public SelectBySkill(Console console, DeveloperService developerService) {
+    public SelectAllDevelopers(Console console, DeveloperService developerService) {
         this.console = console;
         this.developerService = developerService;
     }
@@ -21,6 +21,6 @@ public class SelectBySkill implements Command {
 
     @Override
     public void execute() {
-        developerService.selectByMidSkill();
+        developerService.selectAll();
     }
 }

@@ -13,18 +13,21 @@ public class DeveloperService {
     private static final String INSERT = "INSERT INTO public.developers (first_name, last_name, age, salary) VALUES(?,?,?,?);";
     private static final String UPDATE = "UPDATE public.developers SET first_name = ?, last_name = ?, age = ?, " +
             "salary = ? WHERE id = ?;";
-    private static final String DELETE = "DELETE FROM public.developers WHERE id = ? AND first_name = ? AND last_name = ? " +
-            "AND age = ? AND salary = ?;";
+    private static final String DELETE = "DELETE FROM public.developers WHERE id = ?;";
     private static final String FIND_BY_ID = "SELECT id, first_name, last_name, age, salary FROM public.developers WHERE id = ?;";
     private static final String SELECT_BY_PROJECT = "SELECT developers.id, developers.first_name, developers.last_name, " +
             "developers.age, developers.salary " +
             "FROM developers JOIN developers_projects ON developers_projects.developer_id = developers.id " +
             "WHERE developers_projects.project_id = ?;";
     private static final String SELECT_ALL = "SELECT id, first_name, last_name, age, salary FROM developers";
-    private static final String SELECT_BY_MID_SKILL = "SELECT developers.id, developers.first_name, developers.last_name, " +
+    private static final String SELECT_BY_SKILL_LEVEL = "SELECT developers.id, developers.first_name, developers.last_name, " +
             "developers.age, developers.salary, skills.area " +
             "FROM developers JOIN developers_skills ON developers_skills.developer_id = developers.id " +
-            "JOIN skills ON skills.id = developers_skills.skill_id WHERE skills.level = 'Middle';";
+            "JOIN skills ON skills.id = developers_skills.skill_id WHERE skills.level like ?;";
+    private static final String SELECT_BY_SKILL_AREA = "SELECT developers.id, developers.first_name, developers.last_name, " +
+            "developers.age, developers.salary, skills.area " +
+            "FROM developers JOIN developers_skills ON developers_skills.developer_id = developers.id " +
+            "JOIN skills ON skills.id = developers_skills.skill_id WHERE skills.area like ?;";
     public DeveloperService(DatabaseManagerConnector manager) {
         this.manager = manager;
     }
@@ -68,15 +71,10 @@ public class DeveloperService {
         return developerDto;
     }
 
-    public void delete(DeveloperDto developerDto){
-        DeveloperDao entity = developerConverter.convertToDao(developerDto);
+    public void delete(Integer developerId){
         try (Connection connection = manager.getConnection();
              PreparedStatement statement = connection.prepareStatement(DELETE)){
-            statement.setInt(1, entity.getId());
-            statement.setString(2, entity.getFirstName());
-            statement.setString(3, entity.getLastName());
-            statement.setInt(4, entity.getAge());
-            statement.setInt(5, entity.getSalary());
+            statement.setInt(1, developerId);
             if (statement.executeUpdate() == 0){
                 System.out.println("Developer not deleted!");
             } else {
@@ -161,10 +159,37 @@ public class DeveloperService {
             throw new RuntimeException("No developers found!");
         }
     }
-    public void selectByMidSkill(){
+    public void selectBySkillLevel(String skillLevel){
         ResultSet result;
         try (Connection connection = manager.getConnection();
-             PreparedStatement statement = connection.prepareStatement(SELECT_BY_MID_SKILL)){
+             PreparedStatement statement = connection.prepareStatement(SELECT_BY_SKILL_LEVEL)){
+            statement.setString(1, skillLevel);
+            result = statement.executeQuery();
+            if (!result.isBeforeFirst()){
+                System.out.println("No developers found!");
+            } else {
+                System.out.println("Developers: ");
+                System.out.println("Id | Name | LastName | Age | Salary | Area");
+                while (result.next()) {
+                    System.out.print(result.getInt(1) + " | ");
+                    System.out.print(result.getString(2) + "| ");
+                    System.out.print(result.getString(3) + "| ");
+                    System.out.print(result.getInt(4) + "| ");
+                    System.out.print(result.getInt(5) + "| ");
+                    System.out.print(result.getString(6) + "\n");
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            throw new RuntimeException("No developers found!");
+        }
+    }
+
+    public void selectBySkillArea(String skillArea){
+        ResultSet result;
+        try (Connection connection = manager.getConnection();
+             PreparedStatement statement = connection.prepareStatement(SELECT_BY_SKILL_AREA)){
+            statement.setString(1, skillArea);
             result = statement.executeQuery();
             if (!result.isBeforeFirst()){
                 System.out.println("No developers found!");

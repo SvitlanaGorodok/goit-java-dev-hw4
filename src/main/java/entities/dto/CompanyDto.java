@@ -4,7 +4,7 @@ public class CompanyDto {
     private Integer id;
     private String name;
     private  String description;
-
+    public CompanyDto() { }
     public CompanyDto(Integer id, String name, String description) {
         this.id = id;
         this.name = name;
@@ -33,5 +33,11 @@ public class CompanyDto {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+    @Override
+    public String toString() {
+        return  "id = " + id +
+                ", name = '" + name + '\'' +
+                ", description = '" + description;
     }
 }

@@ -11,8 +11,9 @@ public class CustomerService {
         private final DatabaseManagerConnector manager;
         private static final String INSERT = "INSERT INTO public.customers (name, description) VALUES(?,?);";
         private static final String UPDATE = "UPDATE public.customers SET name = ?, description = ? WHERE id = ?;";
-        private static final String DELETE = "DELETE FROM public.customers WHERE id = ? AND name = ? AND description = ?;";
+        private static final String DELETE = "DELETE FROM public.customers WHERE id = ?;";
         private static final String FIND_BY_ID = "SELECT id, name, description FROM public.customers WHERE id = ?;";
+        private static final String SELECT_ALL = "SELECT id, name, description FROM public.customers";
 
         public CustomerService(DatabaseManagerConnector manager) {
             this.manager = manager;
@@ -53,13 +54,10 @@ public class CustomerService {
             return customerDto;
         }
 
-        public void delete(CustomerDto customerDto){
-            CustomerDao entity = customerConverter.convertToDao(customerDto);
+        public void delete(Integer customerId){
             try (Connection connection = manager.getConnection();
                  PreparedStatement statement = connection.prepareStatement(DELETE)){
-                statement.setInt(1, entity.getId());
-                statement.setString(2, entity.getName());
-                statement.setString(3, entity.getDescription());
+                statement.setInt(1, customerId);
                 if (statement.executeUpdate() == 0){
                     System.out.println("Customer not deleted!");
                 } else {
@@ -94,6 +92,28 @@ public class CustomerService {
             }
             return customerConverter.convertToDto(entity);
         }
+
+    public void selectAll(){
+        ResultSet result;
+        try (Connection connection = manager.getConnection();
+             PreparedStatement statement = connection.prepareStatement(SELECT_ALL)){
+            result = statement.executeQuery();
+            if (!result.isBeforeFirst()){
+                System.out.println("No customers found!");
+            } else {
+                System.out.println("Customers: ");
+                System.out.println("Id | Name | Description ");
+                while (result.next()) {
+                    System.out.print(result.getInt(1) + " | ");
+                    System.out.print(result.getString(2) + "| ");
+                    System.out.print(result.getString(3) + "\n");
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            throw new RuntimeException("No customers found!");
+        }
+    }
     private Integer getGeneratedKey(ResultSet result){
         Integer key = null;
         try{

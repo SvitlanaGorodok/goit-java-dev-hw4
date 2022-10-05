@@ -13,8 +13,9 @@ public class ProjectService {
     private final DatabaseManagerConnector manager;
     private static final String INSERT = "INSERT INTO public.projects (name, description, start_date) VALUES(?,?,?);";
     private static final String UPDATE = "UPDATE public.projects SET name = ?, description = ?, start_date = ?  WHERE id = ?;";
-    private static final String DELETE = "DELETE FROM public.projects WHERE id = ? AND name = ? AND description = ? AND start_date = ?;";
+    private static final String DELETE = "DELETE FROM public.projects WHERE id = ?;";
     private static final String FIND_BY_ID = "SELECT id, name, description, start_date FROM public.projects WHERE id = ?;";
+    private static final String SELECT_ALL = "SELECT id, name, description, start_date FROM public.projects";
     private static final String SELECT_BY_SALARY = "SELECT SUM(developers.salary) FROM developers_projects JOIN developers " +
             "ON developers.id = developers_projects.developer_id WHERE developers_projects.project_id = ?;";
     private static final String SELECT_PROJECTS = "SELECT projects.start_date, projects.name, COUNT(developers_projects.developer_id) " +
@@ -62,14 +63,10 @@ public class ProjectService {
         return projectDto;
     }
 
-    public void delete(ProjectDto projectDto){
-        ProjectDao entity = projectConverter.convertToDao(projectDto);
+    public void delete(Integer projectId){
         try (Connection connection = manager.getConnection();
              PreparedStatement statement = connection.prepareStatement(DELETE)){
-            statement.setInt(1, entity.getId());
-            statement.setString(2, entity.getName());
-            statement.setString(3, entity.getDescription());
-            statement.setDate(4, entity.getStartDate());
+            statement.setInt(1, projectId);
             if (statement.executeUpdate() == 0){
                 System.out.println("Project not deleted!");
             } else {
@@ -142,6 +139,28 @@ public class ProjectService {
         } catch (SQLException ex) {
             ex.printStackTrace();
             throw new RuntimeException("No developers found!");
+        }
+    }
+    public void selectAll(){
+        ResultSet result;
+        try (Connection connection = manager.getConnection();
+             PreparedStatement statement = connection.prepareStatement(SELECT_ALL)){
+            result = statement.executeQuery();
+            if (!result.isBeforeFirst()){
+                System.out.println("No projects found!");
+            } else {
+                System.out.println("Projects: ");
+                System.out.println("Id | Name | Description | Start date ");
+                while (result.next()) {
+                    System.out.print(result.getInt(1) + " | ");
+                    System.out.print(result.getString(2) + "| ");
+                    System.out.print(result.getString(3) + "| ");
+                    System.out.print(result.getDate(4) + "\n");
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            throw new RuntimeException("No projects found!");
         }
     }
     private Integer getGeneratedKey(ResultSet result){
